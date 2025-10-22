@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tic Tac Toe — 2P & Vs Computer</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --x-color: #000000;
+      --o-color: #ff2b2b;
+      --muted: #666666;
+      --accent: #111827;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--accent);
+      -webkit-user-select: none;
+      user-select: none;
+      background-image: url('imagee.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      z-index: 1;
+    }
+
+    body {
+      background-color: rgb(18, 217, 210);
+      background-image: url('imagee.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .app {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 18px 14px 36px;
+      box-sizing: border-box;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    h1 {
+      margin: 6px 0 2px;
+      font-size: 20px;
+      font-weight: 900;
+      color: white;
+    }
+
+    p.lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .menu {
+      margin: 12px 0 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      background: #4f0fcf;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .btn.primary {
+      background: rgba(18, 9, 187, 0.5);
+      color: #fff;
+      border: 2px solid rgb(255, 0, 0);
+    }
+
+    .btn.primary:hover {
+      background: rgb(44, 7, 209);
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .board-wrap {
+      width: min(460px, 92vw);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status {
+      font-size: clamp(40px, 8vw, 100px);
+      min-height: clamp(40px, 8vw, 100px);
+      text-align: center;
+    }
+
+    .board {
+      width: 100%;
+      aspect-ratio: 1/1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .cell {
+      height: 100%;
+      width: 100%;
+      background: transparent;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(28px, 8.5vw, 64px);
+      font-weight: 800;
+      box-shadow: 0 6px 18px rgba(12, 12, 12, 0.06);
+      border: 3px solid #091bb8;
+      padding: 20px;
+      transition: transform 0.3s ease;
+      aspect-ratio: 1/1;
+    }
+    
+    .cell:hover {
+       border: 5px solid #091bb8;
+      background-color: transparent;
+      transform: scale(1.05);
+    }
+
+    .cell.x {
+      color: #22a7b6;
+      font-weight: 800;
+    }
+    
+    .cell.o {
+      color: rgb(9, 41, 197);
+      font-weight: 800;
+    }
+
+    .controls {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .small {
+      font-size: clamp(20px, 5vw, 40px);
+      color: #ffffff;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .win {
+      box-shadow: 0 10px 30px rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.12);
+    }
+
+    #btn-ai {
+      background-color: #4709b8;
+    }
+
+    #btn-ai:hover {
+      background-color: #09b0b8;
+    }
+
+    #restart {
+      background-color: rgb(4, 137, 111);
+      color: white;
+    }
+
+    #restart:hover {
+      background-color: rgba(6, 9, 166,0.8);
+      transform: scale(1.07);
+    }
+
+    #back {
+      background-color: rgb(6, 184, 137);
+      color: white;
+    }
+
+    #back:hover {
+      background-color: rgba(3, 74, 173, 0.8);
+      transform: scale(1.07);
+    }
+
+    .app {
+      background-color: rgb(18, 217, 210);
+      background-image: url('imagee.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    #btn-pvp:hover {
+      transform: scale(1.07);
+    }
+    #btn-ai:hover {
+      transform: scale(1.07);
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 480px) {
+      .app {
+        padding: 10px 8px 20px;
+      }
+      
+      h1 {
+        font-size: 18px;
+      }
+      
+      p.lead {
+        font-size: 11px;
+      }
+      
+      .btn {
+        padding: 8px 12px;
+        font-size: 14px;
+        min-width: 100px;
+      }
+      
+      .cell {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <h1>Tic Tac Toe</h1>
+      <p class="lead" style="color : white;font-weight : 500;">Black X — Red O • Play 2-player or vs Computer (medium)</p>
+    </header>
+    <div class="menu" id="menu">
+      <button class="btn primary" id="btn-pvp">2 Player</button>
+      <button class="btn" id="btn-ai" style="color : white;font-weight : 600;">Vs Computer</button>
+    </div>
+    <div class="board-wrap" id="game-area" style="display:none">
+      <div class="status" id="status"></div>
+      <div class="board" id="board"></div>
+      <div class="controls">
+        <div class="small" id="turn-indicator"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="restart">New Game</button>
+          <button class="btn ghost" id="back">Back</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer" style="color : white;font-weight : 500;">Tip: tap a square to play. X always starts.</div>
+  </div>
+  <script>
+    (function () {
+      const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+      let board, xTurn, winner, mode, cells = [];
+      const boardEl = document.getElementById('board'), statusEl = document.getElementById('status'), turnIndicator = document.getElementById('turn-indicator');
+      document.getElementById('btn-pvp').onclick = () => start('pvp');
+      document.getElementById('btn-ai').onclick = () => start('ai');
+      document.getElementById('restart').onclick = () => reset();
+      document.getElementById('back').onclick = () => { document.getElementById('menu').style.display = ''; document.getElementById('game-area').style.display = 'none'; };
+      function start(m) {
+        mode = m; document.getElementById('menu').style.display = 'none'; document.getElementById('game-area').style.display = ''; reset();
+      }
+      function reset() {
+        board = Array(9).fill(null); xTurn = true; winner = null; boardEl.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+          const c = document.createElement('button'); c.className = 'cell'; c.onclick = () => move(i); boardEl.appendChild(c); cells[i] = c;
+
+        }
+        update();
+      }
+      function move(i) {
+        if (board[i] || winner) return; if (mode === 'ai' && !xTurn) return; board[i] = xTurn ? 'X' : 'O'; xTurn = !xTurn; winner = getWinner(board); update(); if (!winner && mode === 'ai' && !xTurn) setTimeout(aiMove, 400);
+      }
+      function aiMove() {
+        const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null); if (!avail.length) return; let pickOptimal = Math.random() < 0.7; let move; if (pickOptimal) move = minimax(board.slice(), 'O').index; else move = avail[Math.floor(Math.random() * avail.length)]; board[move] = 'O'; xTurn = true; winner = getWinner(board); update();
+      }
+      function update() {
+        for (let i = 0; i < 9; i++) {
+          cells[i].textContent = board[i] || ''; cells[i].className = 'cell ' + (board[i] ? ' ' + board[i].toLowerCase() : '');
+
+        }
+        statusEl.textContent = winner ? (winner === 'draw' ? 'Draw!' : winner + ' wins!') : ''; turnIndicator.textContent = !winner ? (xTurn ? 'X' : 'O') + "'s turn" : '';
+      }
+      function getWinner(b) {
+        for (const [a, b1, c] of wins) { if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a]; } return b.includes(null) ? null : 'draw';
+      }
+      function minimax(b, p) {
+        let win = getWinner(b); if (win === 'O') return { score: 10 };
+        if (win === 'X')
+          return { score: -10 };
+        if (win === 'draw')
+          return { score: 0 };
+        let moves = [];
+        for (let i = 0; i < 9; i++) {
+          if (!b[i]) {
+            b[i] = p; let r = minimax(b, p === 'O' ? 'X' : 'O');
+            moves.push({ index: i, score: r.score }); b[i] = null;
+          }
+        }
+        let best = p === 'O' ? Math.max(...moves.map(m => m.score)) : Math.min(...moves.map(m => m.score)); return moves.find(m => m.score === best) || { index: null, score: 0 };
+      }
+    })();
+  </script>
+</body>
+
+</html>
