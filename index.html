@@ -273,57 +273,66 @@
   </div>
   <script>
     (function () {
-      const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-      let board, xTurn, winner, mode, cells = [];
-      const boardEl = document.getElementById('board'), statusEl = document.getElementById('status'), turnIndicator = document.getElementById('turn-indicator');
-      document.getElementById('btn-pvp').onclick = () => start('pvp');
-      document.getElementById('btn-ai').onclick = () => start('ai');
-      document.getElementById('restart').onclick = () => reset();
-      document.getElementById('back').onclick = () => { document.getElementById('menu').style.display = ''; document.getElementById('game-area').style.display = 'none'; };
-      function start(m) {
-        mode = m; document.getElementById('menu').style.display = 'none'; document.getElementById('game-area').style.display = ''; reset();
+  const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+  let board, xTurn, winner, mode, cells = [];
+  const boardEl = document.getElementById('board'), statusEl = document.getElementById('status'), turnIndicator = document.getElementById('turn-indicator');
+  document.getElementById('btn-pvp').onclick = () => start('pvp');
+  document.getElementById('btn-ai').onclick = () => start('ai');
+  document.getElementById('restart').onclick = () => reset();
+  document.getElementById('back').onclick = () => { document.getElementById('menu').style.display = ''; document.getElementById('game-area').style.display = 'none'; };
+  function start(m) {
+    mode = m; document.getElementById('menu').style.display = 'none'; document.getElementById('game-area').style.display = ''; reset();
+  }
+  function reset() {
+    board = Array(9).fill(null); xTurn = true; winner = null; boardEl.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+      const c = document.createElement('button'); c.className = 'cell'; c.onclick = () => move(i); boardEl.appendChild(c); cells[i] = c;
+    }
+    update();
+  }
+  function move(i) {
+    if (board[i] || winner) return; if (mode === 'ai' && !xTurn) return; board[i] = xTurn ? 'X' : 'O'; xTurn = !xTurn; winner = getWinner(board); update(); if (!winner && mode === 'ai' && !xTurn) setTimeout(aiMove, 400);
+  }
+  function aiMove() {
+    // Always use optimal move (unbeatable AI)
+    const move = minimax(board.slice(), 'O').index;
+    if (move !== null) {
+      board[move] = 'O';
+      xTurn = true;
+      winner = getWinner(board);
+      update();
+    }
+  }
+  function update() {
+    for (let i = 0; i < 9; i++) {
+      cells[i].textContent = board[i] || ''; cells[i].className = 'cell ' + (board[i] ? ' ' + board[i].toLowerCase() : '');
+    }
+    statusEl.textContent = winner ? (winner === 'draw' ? 'Draw!' : winner + ' wins!') : ''; turnIndicator.textContent = !winner ? (xTurn ? 'X' : 'O') + "'s turn" : '';
+  }
+  function getWinner(b) {
+    for (const [a, b1, c] of wins) { if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a]; } return b.includes(null) ? null : 'draw';
+  }
+  function minimax(b, p) {
+    let win = getWinner(b);
+    if (win === 'O') return { score: 10 };
+    if (win === 'X') return { score: -10 };
+    if (win === 'draw') return { score: 0 };
+    let moves = [];
+    for (let i = 0; i < 9; i++) {
+      if (!b[i]) {
+        b[i] = p;
+        let r = minimax(b, p === 'O' ? 'X' : 'O');
+        moves.push({ index: i, score: r.score });
+        b[i] = null;
       }
-      function reset() {
-        board = Array(9).fill(null); xTurn = true; winner = null; boardEl.innerHTML = '';
-        for (let i = 0; i < 9; i++) {
-          const c = document.createElement('button'); c.className = 'cell'; c.onclick = () => move(i); boardEl.appendChild(c); cells[i] = c;
-
-        }
-        update();
-      }
-      function move(i) {
-        if (board[i] || winner) return; if (mode === 'ai' && !xTurn) return; board[i] = xTurn ? 'X' : 'O'; xTurn = !xTurn; winner = getWinner(board); update(); if (!winner && mode === 'ai' && !xTurn) setTimeout(aiMove, 400);
-      }
-      function aiMove() {
-        const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null); if (!avail.length) return; let pickOptimal = Math.random() < 0.7; let move; if (pickOptimal) move = minimax(board.slice(), 'O').index; else move = avail[Math.floor(Math.random() * avail.length)]; board[move] = 'O'; xTurn = true; winner = getWinner(board); update();
-      }
-      function update() {
-        for (let i = 0; i < 9; i++) {
-          cells[i].textContent = board[i] || ''; cells[i].className = 'cell ' + (board[i] ? ' ' + board[i].toLowerCase() : '');
-
-        }
-        statusEl.textContent = winner ? (winner === 'draw' ? 'Draw!' : winner + ' wins!') : ''; turnIndicator.textContent = !winner ? (xTurn ? 'X' : 'O') + "'s turn" : '';
-      }
-      function getWinner(b) {
-        for (const [a, b1, c] of wins) { if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a]; } return b.includes(null) ? null : 'draw';
-      }
-      function minimax(b, p) {
-        let win = getWinner(b); if (win === 'O') return { score: 10 };
-        if (win === 'X')
-          return { score: -10 };
-        if (win === 'draw')
-          return { score: 0 };
-        let moves = [];
-        for (let i = 0; i < 9; i++) {
-          if (!b[i]) {
-            b[i] = p; let r = minimax(b, p === 'O' ? 'X' : 'O');
-            moves.push({ index: i, score: r.score }); b[i] = null;
-          }
-        }
-        let best = p === 'O' ? Math.max(...moves.map(m => m.score)) : Math.min(...moves.map(m => m.score)); return moves.find(m => m.score === best) || { index: null, score: 0 };
-      }
-    })();
+    }
+    if (moves.length === 0) return { index: null, score: 0 };
+    let best = p === 'O' ? Math.max(...moves.map(m => m.score)) : Math.min(...moves.map(m => m.score));
+    return moves.find(m => m.score === best);
+  }
+})();
   </script>
 </body>
 
 </html>
+
