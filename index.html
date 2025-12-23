@@ -29,7 +29,7 @@
       z-index: 1;
     }
 
-    body {      
+    body {
       background-image: url('imagee.jpg');
       background-size: cover;
       background-repeat: no-repeat;
@@ -64,7 +64,7 @@
     }
 
     .menu {
-      margin: 12px 0 18px;
+      margin: 12px 0 6px;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -79,6 +79,7 @@
       font-size: 15px;
       min-width: 120px;
       text-align: center;
+      cursor: pointer;
     }
 
     .btn.primary {
@@ -133,10 +134,11 @@
       padding: 20px;
       transition: transform 0.3s ease;
       aspect-ratio: 1/1;
+      cursor: pointer;
     }
-    
+
     .cell:hover {
-       border: 5px solid #091bb8;
+      border: 5px solid #091bb8;
       background-color: transparent;
       transform: scale(1.05);
     }
@@ -145,7 +147,7 @@
       color: #22a7b6;
       font-weight: 800;
     }
-    
+
     .cell.o {
       color: rgb(9, 41, 197);
       font-weight: 800;
@@ -172,75 +174,8 @@
       text-align: center;
     }
 
-    .win {
-      box-shadow: 0 10px 30px rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.12);
-    }
-
-    #btn-ai {
-      background-color: #4709b8;
-    }
-
-    #btn-ai:hover {
-      background-color: #09b0b8;
-    }
-
-    #restart {
-      background-color: rgb(4, 137, 111);
-      color: white;
-    }
-
-    #restart:hover {
-      background-color: rgba(6, 9, 166,0.8);
-      transform: scale(1.07);
-    }
-
-    #back {
-      background-color: rgb(6, 184, 137);
-      color: white;
-    }
-
-    #back:hover {
-      background-color: rgba(3, 74, 173, 0.8);
-      transform: scale(1.07);
-    }
-
-    .app {      
-      background-image: url('image.jpg');
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
-    #btn-pvp:hover {
-      transform: scale(1.07);
-    }
-    #btn-ai:hover {
-      transform: scale(1.07);
-    }
-
-    /* Mobile-specific adjustments */
-    @media (max-width: 480px) {
-      .app {
-        padding: 10px 8px 20px;
-      }
-      
-      h1 {
-        font-size: 18px;
-      }
-      
-      p.lead {
-        font-size: 11px;
-      }
-      
-      .btn {
-        padding: 8px 12px;
-        font-size: 14px;
-        min-width: 100px;
-      }
-      
-      .cell {
-        padding: 10px;
-      }
+    #sound-toggle {
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -249,89 +184,190 @@
   <div class="app">
     <header>
       <h1>Tic Tac Toe</h1>
-      <p class="lead" style="color : white;font-weight : 500;">Black X — Red O • Play 2-player or vs Computer (medium)</p>
+      <p class="lead" style="color:white;font-weight:500;">Black X — Red O • Play 2-player or vs Computer</p>
     </header>
+
     <div class="menu" id="menu">
       <button class="btn primary" id="btn-pvp">2 Player</button>
-      <button class="btn" id="btn-ai" style="color : white;font-weight : 600;">Vs Computer</button>
+      <button class="btn" id="btn-ai" style="color:white;font-weight:600;">Vs Computer</button>
+      <div style="width:100%; display:flex; justify-content:center;">
+        <button class="btn" id="sound-toggle">🔊 Sound: ON</button>
+      </div>
     </div>
+
     <div class="board-wrap" id="game-area" style="display:none">
       <div class="status" id="status"></div>
       <div class="board" id="board"></div>
       <div class="controls">
         <div class="small" id="turn-indicator"></div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px; flex-wrap:wrap;">
           <button class="btn" id="restart">New Game</button>
           <button class="btn ghost" id="back">Back</button>
         </div>
       </div>
     </div>
-    <div class="footer" style="color : white;font-weight : 500;">Tip: tap a square to play. X always starts.</div>
+
+    <div class="footer" style="color:white;font-weight:500;">Tip: tap a square to play. X always starts.</div>
   </div>
+
   <script>
-    (function () {
-  const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-  let board, xTurn, winner, mode, cells = [];
-  const boardEl = document.getElementById('board'), statusEl = document.getElementById('status'), turnIndicator = document.getElementById('turn-indicator');
-  document.getElementById('btn-pvp').onclick = () => start('pvp');
-  document.getElementById('btn-ai').onclick = () => start('ai');
-  document.getElementById('restart').onclick = () => reset();
-  document.getElementById('back').onclick = () => { document.getElementById('menu').style.display = ''; document.getElementById('game-area').style.display = 'none'; };
-  function start(m) {
-    mode = m; document.getElementById('menu').style.display = 'none'; document.getElementById('game-area').style.display = ''; reset();
-  }
-  function reset() {
-    board = Array(9).fill(null); xTurn = true; winner = null; boardEl.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-      const c = document.createElement('button'); c.className = 'cell'; c.onclick = () => move(i); boardEl.appendChild(c); cells[i] = c;
-    }
-    update();
-  }
-  function move(i) {
-    if (board[i] || winner) return; if (mode === 'ai' && !xTurn) return; board[i] = xTurn ? 'X' : 'O'; xTurn = !xTurn; winner = getWinner(board); update(); if (!winner && mode === 'ai' && !xTurn) setTimeout(aiMove, 400);
-  }
-  function aiMove() {
-    // Always use optimal move (unbeatable AI)
-    const move = minimax(board.slice(), 'O').index;
-    if (move !== null) {
-      board[move] = 'O';
-      xTurn = true;
-      winner = getWinner(board);
-      update();
-    }
-  }
-  function update() {
-    for (let i = 0; i < 9; i++) {
-      cells[i].textContent = board[i] || ''; cells[i].className = 'cell ' + (board[i] ? ' ' + board[i].toLowerCase() : '');
-    }
-    statusEl.textContent = winner ? (winner === 'draw' ? 'Draw!' : winner + ' wins!') : ''; turnIndicator.textContent = !winner ? (xTurn ? 'X' : 'O') + "'s turn" : '';
-  }
-  function getWinner(b) {
-    for (const [a, b1, c] of wins) { if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a]; } return b.includes(null) ? null : 'draw';
-  }
-  function minimax(b, p) {
-    let win = getWinner(b);
-    if (win === 'O') return { score: 10 };
-    if (win === 'X') return { score: -10 };
-    if (win === 'draw') return { score: 0 };
-    let moves = [];
-    for (let i = 0; i < 9; i++) {
-      if (!b[i]) {
-        b[i] = p;
-        let r = minimax(b, p === 'O' ? 'X' : 'O');
-        moves.push({ index: i, score: r.score });
-        b[i] = null;
+    let soundOn = true;
+    const soundBtn = document.getElementById('sound-toggle');
+
+    // SOUND TOGGLE FUNCTION
+    soundBtn.onclick = () => {
+      if (soundOn) {
+        // Currently ON → announce turning OFF then disable
+        const speech = new SpeechSynthesisUtterance("Sound turned OFF");
+        speech.lang = "en-IN";
+        speech.rate = 1;
+        speech.pitch = 1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(speech);
+        soundOn = false;
+      } else {
+        // Currently OFF → enable then announce
+        soundOn = true;
+        const speech = new SpeechSynthesisUtterance("Sound turned ON");
+        speech.lang = "en-IN";
+        speech.rate = 1;
+        speech.pitch = 1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(speech);
       }
+      soundBtn.textContent = soundOn ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+    };
+
+    // SPEAK FUNCTION
+    function speak(text) {
+      if (!soundOn) return;
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = "en-IN";
+      speech.rate = 1;
+      speech.pitch = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(speech);
     }
-    if (moves.length === 0) return { index: null, score: 0 };
-    let best = p === 'O' ? Math.max(...moves.map(m => m.score)) : Math.min(...moves.map(m => m.score));
-    return moves.find(m => m.score === best);
-  }
-})();
+
+    // GAME LOGIC
+    (function () {
+      const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+      let board, xTurn, winner, mode, cells = [];
+      const boardEl = document.getElementById('board'),
+        statusEl = document.getElementById('status'),
+        turnIndicator = document.getElementById('turn-indicator');
+
+      document.getElementById('btn-pvp').onclick = () => { start('pvp'); speak("You clicked 2 Player button"); };
+      document.getElementById('btn-ai').onclick = () => { start('ai'); speak("You clicked Vs Computer button"); };
+      document.getElementById('restart').onclick = () => { reset(); speak("You clicked New Game button"); };
+      document.getElementById('back').onclick = () => {
+        document.getElementById('menu').style.display = '';
+        document.getElementById('game-area').style.display = 'none';
+        speak("You clicked Back button");
+      };
+
+      function start(m) {
+        mode = m;
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('game-area').style.display = '';
+        reset();
+      }
+
+      function reset() {
+        board = Array(9).fill(null);
+        xTurn = true;
+        winner = null;
+        boardEl.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+          const c = document.createElement('button');
+          c.className = 'cell';
+          c.onclick = () => move(i);
+          boardEl.appendChild(c);
+          cells[i] = c;
+        }
+        update();
+      }
+
+      function move(i) {
+        if (board[i] || winner) return;
+        const boxNumber = i + 1;
+
+        if (mode === 'pvp') {
+          board[i] = xTurn ? 'X' : 'O';
+          speak(xTurn ? `Player 1 clicked box ${boxNumber}` : `Player 2 clicked box ${boxNumber}`);
+        } else {
+          if (xTurn) {
+            board[i] = 'X';
+            speak(`You clicked box ${boxNumber}`);
+          } else return;
+        }
+
+        xTurn = !xTurn;
+        winner = getWinner(board);
+        update();
+
+        if (mode === 'ai' && !xTurn && !winner) {
+          setTimeout(aiMove, 400);
+        } else if (winner) announceWinner(winner);
+      }
+
+      function aiMove() {
+        const moveIndex = minimax(board.slice(), 'O').index;
+        if (moveIndex !== null) {
+          board[moveIndex] = 'O';
+          xTurn = true;
+          winner = getWinner(board);
+          update();
+          speak(`Computer clicked box ${moveIndex + 1}`);
+          if (!winner) speak("Your turn");
+          else announceWinner(winner);
+        }
+      }
+
+      function update() {
+        for (let i = 0; i < 9; i++) {
+          cells[i].textContent = board[i] || '';
+          cells[i].className = 'cell ' + (board[i] ? ' ' + board[i].toLowerCase() : '');
+        }
+        statusEl.textContent = winner ? (winner === 'draw' ? 'Draw!' : winner + ' wins!') : '';
+        turnIndicator.textContent = !winner ? (xTurn ? 'X' : 'O') + "'s turn" : '';
+      }
+
+      function getWinner(b) {
+        for (const [a, b1, c] of wins) {
+          if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a];
+        }
+        return b.includes(null) ? null : 'draw';
+      }
+
+      function minimax(b, p) {
+        let win = getWinner(b);
+        if (win === 'O') return { score: 10 };
+        if (win === 'X') return { score: -10 };
+        if (win === 'draw') return { score: 0 };
+        let moves = [];
+        for (let i = 0; i < 9; i++) {
+          if (!b[i]) {
+            b[i] = p;
+            let r = minimax(b, p === 'O' ? 'X' : 'O');
+            moves.push({ index: i, score: r.score });
+            b[i] = null;
+          }
+        }
+        if (moves.length === 0) return { index: null, score: 0 };
+        let best = p === 'O' ? Math.max(...moves.map(m => m.score)) : Math.min(...moves.map(m => m.score));
+        return moves.find(m => m.score === best);
+      }
+
+      function announceWinner(winner) {
+        if (winner === 'draw') speak("It's a draw match");
+        else if (winner === 'X' && mode === 'pvp') speak("Player 1 wins the game");
+        else if (winner === 'O' && mode === 'pvp') speak("Player 2 wins the game");
+        else if (winner === 'X') speak("Player wins the game");
+        else if (winner === 'O') speak("Computer wins the game");
+      }
+    })();
   </script>
 </body>
 
 </html>
-
-
-
